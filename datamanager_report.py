@@ -49,7 +49,8 @@ def report(data, reportfile):
 
 
     with open(reportfile, 'w') as f:
-
+        f.write("Yoda datamanager report\n")
+        f.write(f"Generated {datetime.now().strftime('%Y%m%d at %H:%M:%S')}\n\n")
         for cat in dict(sorted(report_data.items())):
 
             f.write(f'{cat}\n')
@@ -60,13 +61,12 @@ def report(data, reportfile):
 
                 f.write(f'\t\t{d}\n')
 
-            f.write('\tresearch-groups:\n')
+            f.write('\tresearch collections:\n')
 
             for g in report_data[cat]['research-groups']:
 
                 f.write(f'\t\t{g}\n')
-
-        f.write('\n\n')
+            f.write('\n')
 
     logger.info(f"Report file written to {reportfile}")
 
