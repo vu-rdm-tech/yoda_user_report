@@ -9,6 +9,16 @@ from logger import logger
 
 
 def collect():
+    """
+    Collect all data from irods and return as a dict
+    
+    - login to irods
+    - get all collections in home directory
+    - get all groups
+    - close irods session
+    
+    :return: a dict with all data
+    """
     irodsdata = IrodsData()
     irodsdata.get_session()
     logger.info("start data collection")
@@ -18,7 +28,10 @@ def collect():
 
 
 def report(data, reportfile):
-    # report
+    """
+    Create a report based on the collected data
+    """
+   
     report_data = {}
     for group in data["groups"]:
         cat = data["groups"][group]["category"]
@@ -51,6 +64,7 @@ def main():
     logger.info(f"start script {os.path.realpath(__file__)}")
     data = collect()
     report(data, f"./data/yoda_datamanagers-{datetime.now().strftime('%Y%m%d')}.txt")
+
 
 
 if __name__ == "__main__":

@@ -3,6 +3,13 @@ from datetime import datetime
 
 
 def get_logger():
+    """
+    Initialize and configure the logger for the Yoda datamanager report.
+    
+    This function sets up logging with a file handler and a stream handler. It configures the log level to INFO and the log format. It returns the configured logger object.
+    
+    :return: logger object configured with file and stream handlers
+    """
     LOGFILE = f"./log/datamamager-report_{datetime.now().strftime('%Y%m%d')}.log"
     logger = logging.getLogger("yoda_datamanager_report")
     logger.propagate = False

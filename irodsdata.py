@@ -17,6 +17,16 @@ class IrodsData:
         self.logger = logger
 
     def collect(self):
+        """
+        Collects all data from irods
+        
+        - login to irods
+        - get all collections in home directory
+        - get all groups
+        - close irods session
+        
+        :return: a dict with all data
+        """
         self.data["collections"] = self.get_home_collections()
         self.data["groups"] = self.get_groups()
 
@@ -29,11 +39,27 @@ class IrodsData:
         return self.data
 
     def close_session(self):
+        """
+        Close the irods session
+        
+        - cleanup the session
+        - set self.session to None
+        - log the action
+        """
         self.session.cleanup()
         self.session = None
         self.logger.info("irods session closed")
 
     def get_session(self):
+        """
+        Establishes a session with the iRODS server.
+
+        - Logs the session setup process.
+        - Attempts to set up the session and verify login by accessing home collections.
+        - Logs and handles exceptions if authentication fails.
+
+        :return: True if session setup is successful, otherwise terminates the program.
+        """
         try:
             self.logger.info("setup irods session")
             self.session = setup_session()
@@ -46,6 +72,14 @@ class IrodsData:
         return True
 
     def get_home_collections(self):
+        """
+        Get all collections in home directory
+        
+        - get all subcollections from home directory
+        - return a dict with all collection names as keys
+        
+        :return: a dict with all home collections
+        """
         collections = {}
         coll = self.session.collections.get(f"/{self.session.zone}/home")
         for col in coll.subcollections:
@@ -53,6 +87,12 @@ class IrodsData:
         return collections
 
     def get_member_count(self, group_name):
+        """
+        Count the number of members in a group that are internal or external to the VU.
+        
+        :param group_name: The name of the group to count members for
+        :return: a tuple of two integers, the first is the number of internal members, the second the number of external members
+        """
         internal = 0
         external = 0
         for user in self.session.user_groups.get(group_name).members:
@@ -63,6 +103,13 @@ class IrodsData:
         return internal, external
 
     def get_groups(self):
+        """
+        Retrieve information about groups from iRODS sessions.
+        
+        Iterates through the collections data and extracts group information based on the fact the path name equals the group name.
+        
+        :return: a dictionary containing group information
+        """
         groups = {}
         for path in self.data["collections"]:
             if path.startswith("research-") or path.startswith("datamanager-"):
