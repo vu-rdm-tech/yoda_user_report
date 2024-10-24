@@ -118,8 +118,3 @@ scripts/config.py
 *.xlsx
 *.txt
 
-setup_session.py
-config.py
-# created by collectstatic
-#static/admin/
-#static/django_tables2/
