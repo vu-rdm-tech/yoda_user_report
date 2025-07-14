@@ -17,10 +17,13 @@ def get_irods_environment(irods_environment_file):
         f"Trying to retrieve connection settings from: {irods_environment_file}"
     )
 
-    with open(irods_environment_file, "r") as f:
+    try:
+        with open(irods_environment_file, "r") as f:
 
-        return json.load(f)
-
+            return json.load(f)
+    except:
+        logger.error(f'Could not open {irods_environment_file}')
+        exit()
 
 def setup_session(ca_file=None):
     """Use irods environment files to configure a iRODSSession. User is prompted for the password"""
