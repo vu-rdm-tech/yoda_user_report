@@ -118,4 +118,5 @@ scripts/config.py
 *.xlsx
 *.txt
 *.csv
+*.png
 
