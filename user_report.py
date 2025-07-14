@@ -53,7 +53,7 @@ def user_report(data, reportfile):
 def main():
     logger.info(f"start script {os.path.realpath(__file__)}")
     data = collect()
-    report(data, f"./data/yoda_datamanagers-{datetime.now().strftime('%Y%m%d')}.csv")
+    report(data, f"./data/yoda_users-{datetime.now().strftime('%Y%m%d')}.csv")
 
 
 
