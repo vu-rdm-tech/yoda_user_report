@@ -27,7 +27,7 @@ def collect():
     return data
 
 
-def user_report(data, reportfile):
+def report(data, reportfile):
     """
     Create a list of unique group members
     """
