@@ -117,4 +117,5 @@ scripts/config.py
 *.json
 *.xlsx
 *.txt
+*.csv
 
