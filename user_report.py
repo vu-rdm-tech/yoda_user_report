@@ -8,7 +8,7 @@ import json
 from logger import logger
 
 
-def collect():
+def collect(active, cutoff):
     """
     Collect all data from irods and return as a dict
     
@@ -22,12 +22,12 @@ def collect():
     irodsdata = IrodsData()
     irodsdata.get_session()
     logger.info("start data collection")
-    data = irodsdata.collect()
+    data = irodsdata.collect(active, cutoff)
     irodsdata.close_session()
     return data
 
 
-def report(data, reportfile):
+def report(data, reportfile, active, cutoff):
     """
     Create a list of unique group members
     """
@@ -41,8 +41,10 @@ def report(data, reportfile):
                 report_data.append(member)
 
     with open(reportfile, "w") as f:
-        f.write("Yoda users report\n")
-        f.write(f"Generated {datetime.now().strftime('%Y%m%d at %H:%M:%S')}\n\n")
+        f.write("Yoda users report.\n")
+        if active:
+            f.write(f"Users in groups with newest file less than {cutoff} days old AND no files + group created less than {cutoff} days ago\n OR in a datamanger group.\n")
+        f.write(f"Generated {datetime.now().strftime('%Y%m%d at %H:%M:%S')}.\n\n")
         for member in report_data:
             f.write(f"{member}\n")
 
@@ -52,8 +54,10 @@ def report(data, reportfile):
 
 def main():
     logger.info(f"start script {os.path.realpath(__file__)}")
-    data = collect()
-    report(data, f"./data/yoda_users-{datetime.now().strftime('%Y%m%d')}.csv")
+    active=True
+    cutoff=6*365/12
+    data = collect(active=active, cutoff=cutoff)
+    report(data, f"./data/yoda_users-{datetime.now().strftime('%Y%m%d')}.csv", active=active, cutoff=cutoff)
 
 
 

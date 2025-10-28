@@ -1,9 +1,11 @@
-from irods.column import Like
+from irods.column import Like, Criterion
 from irods.models import Collection, DataObject
 from datetime import datetime
 from setup_session import setup_session
 from logger import logger
 import re
+from datetime import datetime, timedelta
+from dateutil.relativedelta import relativedelta
 
 
 def handle_exception():
@@ -16,7 +18,7 @@ class IrodsData:
         self.data = {"collections": {}, "groups": []}
         self.logger = logger
 
-    def collect(self):
+    def collect(self, active=True, cutoff=6*365/12):
         """
         Collects all data from irods
         
@@ -28,7 +30,11 @@ class IrodsData:
         :return: a dict with all data
         """
         self.data["collections"] = self.get_home_collections()
-        self.data["groups"] = self.get_groups()
+        if active:
+            self.data["groups"] = self.get_active_groups(cutoff=cutoff)
+        else:
+            self.data["groups"] = self.get_groups()
+            
 
         group_members = []
         for g in self.data["groups"]:
@@ -102,6 +108,53 @@ class IrodsData:
                 external += 1
         return internal, external
 
+    def get_active_groups(self, root='home', cutoff=6*365/12):
+        """
+        Retrieve information about groups from iRODS sessions.
+        
+        Iterates through the collections data and extracts group information based on the fact the path name equals the group name.
+        
+        :return: a dictionary containing group information
+        """
+        groups = {}
+        for path in self.data["collections"]:
+            if path.startswith("research-") or path.startswith("datamanager-"):
+                groupname = path
+                newest = self.query_collection_newest(full_path=f'/{self.session.zone}/{root}/{path}')
+                created = self.query_collection_creation(full_path=f'/{self.session.zone}/{root}/{path}')
+                threshold = datetime.now() - timedelta(days=cutoff)
+                active = False
+                if newest:
+                    if newest > threshold:
+                        active = True
+                if not newest and created > threshold:
+                    active = True
+                if path.startswith("datamanager-"):
+                    active = True
+                if active:
+                    print(path, newest, created)
+                    groups[groupname] = {}
+                    group_obj = self.session.user_groups.get(groupname)
+                    groups[groupname]["category"] = group_obj.metadata.get_one(
+                        "category"
+                    ).value
+                    try:
+                        groups[groupname]["data_classification"] = (
+                            group_obj.metadata.get_one("data_classification").value
+                        )
+                    except:
+                        groups[groupname]["data_classification"] = "NA"
+                    member_names = [user.name for user in group_obj.members]
+                    groups[groupname]["members"] = member_names
+                    groups[groupname]["read_members"] = []
+                    if path.startswith("research-"):
+                        read_group_obj = self.session.user_groups.get(
+                            groupname.replace("research-", "read-", 1)
+                        )
+                        read_member_names = [user.name for user in read_group_obj.members]
+                        groups[groupname]["read_members"] = read_member_names
+        return groups
+
     def get_groups(self):
         """
         Retrieve information about groups from iRODS sessions.
@@ -135,3 +188,18 @@ class IrodsData:
                     read_member_names = [user.name for user in read_group_obj.members]
                     groups[groupname]["read_members"] = read_member_names
         return groups
+
+    def query_collection_creation(self, full_path):
+        query = self.session.query(Collection.name, Collection.create_time).filter(Criterion('=', Collection.name, full_path)).first()
+        # 2025-07-11 10:05:56
+        created = query[Collection.create_time]
+        return created
+
+    def query_collection_newest(self, full_path):
+        query = self.session.query(DataObject.name, DataObject.create_time).filter(
+            Like(Collection.name, f'{full_path}%')).order_by(DataObject.create_time, order='desc').first()
+        try:
+            newest=query[DataObject.create_time]
+        except:
+            newest=False
+        return newest
