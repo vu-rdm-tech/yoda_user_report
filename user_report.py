@@ -43,8 +43,7 @@ def report(data, reportfile, active, cutoff):
     with open(reportfile, "w") as f:
         f.write("Yoda users report.\n")
         if active:
-            f.write(f"Users in groups with newest file less than {cutoff} days old AND no files + group created less than {cutoff} days ago\n
-             OR in a datamanager group.\n")
+            f.write(f"Users in groups with newest file less than {cutoff} days old AND no files + group created less than {cutoff} days ago\n OR in a datamanager group.\n")
         f.write(f"Generated {datetime.now().strftime('%Y%m%d at %H:%M:%S')}.\n\n")
         for member in report_data:
             f.write(f"{member}\n")
