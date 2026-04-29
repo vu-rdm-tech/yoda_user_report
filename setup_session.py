@@ -19,13 +19,12 @@ def get_irods_environment(irods_environment_file):
 
     try:
         with open(irods_environment_file, "r") as f:
-
             return json.load(f)
     except:
         logger.error(f'Could not open {irods_environment_file}')
         exit()
 
-def setup_session(ca_file=None):
+def setup_session(ca_file='/etc/ssl/certs/ca-certificates.crt'):
     """Use irods environment files to configure a iRODSSession. User is prompted for the password"""
 
     irods_env = get_irods_environment(f"{Path.home()}/.irods/irods_environment.json")
