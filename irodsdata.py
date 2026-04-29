@@ -101,7 +101,7 @@ class IrodsData:
         """
         internal = 0
         external = 0
-        for user in self.session.user_groups.get(group_name).members:
+        for user in self.session.groups.get(group_name).members:
             if user.name.endswith(("vu.nl", "acta.nl")):
                 internal += 1
             else:
@@ -133,7 +133,7 @@ class IrodsData:
                     active = True
                 if active:
                     groups[groupname] = {}
-                    group_obj = self.session.user_groups.get(groupname)
+                    group_obj = self.session.groups.get(groupname)
                     groups[groupname]["category"] = group_obj.metadata.get_one(
                         "category"
                     ).value
@@ -147,7 +147,7 @@ class IrodsData:
                     groups[groupname]["members"] = member_names
                     groups[groupname]["read_members"] = []
                     if path.startswith("research-"):
-                        read_group_obj = self.session.user_groups.get(
+                        read_group_obj = self.session.groups.get(
                             groupname.replace("research-", "read-", 1)
                         )
                         read_member_names = [user.name for user in read_group_obj.members]
@@ -167,7 +167,7 @@ class IrodsData:
             if path.startswith("research-") or path.startswith("datamanager-"):
                 groupname = path
                 groups[groupname] = {}
-                group_obj = self.session.user_groups.get(groupname)
+                group_obj = self.session.groups.get(groupname)
                 groups[groupname]["category"] = group_obj.metadata.get_one(
                     "category"
                 ).value
@@ -181,7 +181,7 @@ class IrodsData:
                 groups[groupname]["members"] = member_names
                 groups[groupname]["read_members"] = []
                 if path.startswith("research-"):
-                    read_group_obj = self.session.user_groups.get(
+                    read_group_obj = self.session.groups.get(
                         groupname.replace("research-", "read-", 1)
                     )
                     read_member_names = [user.name for user in read_group_obj.members]
