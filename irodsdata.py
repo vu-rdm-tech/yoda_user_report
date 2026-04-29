@@ -132,7 +132,6 @@ class IrodsData:
                 if path.startswith("datamanager-"):
                     active = True
                 if active:
-                    print(path, newest, created)
                     groups[groupname] = {}
                     group_obj = self.session.user_groups.get(groupname)
                     groups[groupname]["category"] = group_obj.metadata.get_one(

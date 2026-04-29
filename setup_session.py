@@ -60,7 +60,7 @@ def setup_session(ca_file=None):
         user=irods_env["irods_user_name"],
         password=password,
         zone=irods_env["irods_zone_name"],
-        authentication_scheme="pam",
+        authentication_scheme="pam_password",
         **ssl_settings,
     )
 

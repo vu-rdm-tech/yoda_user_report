@@ -7,6 +7,10 @@ from datetime import datetime
 import json
 from logger import logger
 
+import argparse
+
+parser = argparse.ArgumentParser("user_report")
+parser.add_argument('--active', action=argparse.BooleanOptionalAction)
 
 def collect(active, cutoff):
     """
@@ -42,9 +46,9 @@ def report(data, reportfile, active, cutoff):
 
     with open(reportfile, "w") as f:
         f.write("Yoda users report.\n")
+        f.write(f"Generated {datetime.now().strftime('%Y%m%d at %H:%M:%S')}.\n\n")
         if active:
             f.write(f"Users in groups with newest file less than {cutoff} days old AND no files + group created less than {cutoff} days ago\n OR in a datamanager group.\n")
-            f.write(f"Generated {datetime.now().strftime('%Y%m%d at %H:%M:%S')}.\n\n")
         for member in report_data:
             f.write(f"{member}\n")
 
@@ -54,10 +58,17 @@ def report(data, reportfile, active, cutoff):
 
 def main():
     logger.info(f"start script {os.path.realpath(__file__)}")
-    active=True
     cutoff=6*365/12
+    args=parser.parse_args()
+    active=args.active
+    if active:
+        logger.info(f"Users in groups with newest file less than {cutoff} days old AND no files + group created less than {cutoff} days ago\n OR in a datamanager group.\n")
+    else:
+        logger.info(f"Retrieving all users from all groups")
     data = collect(active=active, cutoff=cutoff)
-    report(data, f"./data/yoda_users-{datetime.now().strftime('%Y%m%d')}.csv", active=active, cutoff=cutoff)
+    reportfilename=f"./data/yoda_users-{datetime.now().strftime('%Y%m%d')}.csv"
+    logger.info(f"Write to {reportfilename}")
+    report(data, reportfilename, active=active, cutoff=cutoff)
 
 
 
