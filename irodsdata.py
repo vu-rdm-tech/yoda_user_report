@@ -1,12 +1,13 @@
 from irods.column import Like, Criterion
 from irods.models import Collection, DataObject
-from datetime import datetime
 from setup_session import setup_session
 from logger import logger
 import re
 from datetime import datetime, timedelta
+import pytz
 from dateutil.relativedelta import relativedelta
 
+utc=pytz.UTC
 
 def handle_exception():
     raise SystemExit(0)
@@ -108,7 +109,7 @@ class IrodsData:
                 external += 1
         return internal, external
 
-    def get_active_groups(self, root='home', cutoff=6*365/12):
+    def get_active_groups(self, root='home', cutoff=365/2):
         """
         Retrieve information about groups from iRODS sessions.
         
@@ -122,7 +123,7 @@ class IrodsData:
                 groupname = path
                 newest = self.query_collection_newest(full_path=f'/{self.session.zone}/{root}/{path}')
                 created = self.query_collection_creation(full_path=f'/{self.session.zone}/{root}/{path}')
-                threshold = datetime.now() - timedelta(days=cutoff)
+                threshold = datetime.now().replace(tzinfo=utc) - timedelta(days=cutoff)
                 active = False
                 if newest:
                     if newest > threshold:

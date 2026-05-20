@@ -3,7 +3,6 @@ from setup_session import setup_session
 from irodsdata import IrodsData
 import os
 from datetime import datetime
-
 import json
 from logger import logger
 
@@ -58,7 +57,7 @@ def report(data, reportfile, active, cutoff):
 
 def main():
     logger.info(f"start script {os.path.realpath(__file__)}")
-    cutoff=6*365/12
+    cutoff=365
     args=parser.parse_args()
     active=args.active
     if active:
