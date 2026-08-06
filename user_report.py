@@ -30,26 +30,34 @@ def collect(active, cutoff):
     return data
 
 
+def get_faculty(group_name):
+    """
+    Extract the faculty from a group name, e.g. "research-fsw-dep-project" -> "fsw"
+    """
+    parts = group_name.split("-")
+    return parts[1] if len(parts) > 1 else ""
+
+
 def report(data, reportfile, active, cutoff):
     """
     Create a list of unique group members
     """
-   
-    report_data = []
+
+    report_data = {}
     for group in data["groups"]:
         cat = data["groups"][group]["category"]
+        faculty = get_faculty(group)
         members = data["groups"][group]["members"]
         for member in members:
-            if member not in report_data:
-                report_data.append(member)
+            report_data.setdefault(member, set()).add(faculty)
 
     with open(reportfile, "w") as f:
         f.write("Yoda users report.\n")
         f.write(f"Generated {datetime.now().strftime('%Y%m%d at %H:%M:%S')}.\n\n")
         if active:
             f.write(f"Users in groups with newest file less than {cutoff} days old AND no files + group created less than {cutoff} days ago\n OR in a datamanager group.\n")
-        for member in report_data:
-            f.write(f"{member}\n")
+        for member, faculties in report_data.items():
+            f.write(f"{member},{';'.join(sorted(faculties))}\n")
 
     logger.info(f"Report file written to {reportfile}")
     logger.info("script finished")
@@ -57,7 +65,7 @@ def report(data, reportfile, active, cutoff):
 
 def main():
     logger.info(f"start script {os.path.realpath(__file__)}")
-    cutoff=365
+    cutoff=365/2
     args=parser.parse_args()
     active=args.active
     if active:
